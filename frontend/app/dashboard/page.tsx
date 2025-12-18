@@ -29,6 +29,12 @@ export default function DashboardPage() {
               Classify
             </Link>
             <Link
+              href="/live-tracking"
+              className="text-sm font-medium hover:text-primary transition-colors"
+            >
+              Live Tracking
+            </Link>
+            <Link
               href="/dashboard"
               className="text-sm font-medium text-primary"
             >

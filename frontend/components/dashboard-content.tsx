@@ -2,69 +2,144 @@
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BarChart3, TrendingUp, Calendar } from "lucide-react";
+import { BarChart3, TrendingUp, Calendar, RefreshCw } from "lucide-react";
+import { useEffect, useState } from "react";
+
+interface ClassificationEntry {
+  id: number;
+  category: string;
+  confidence: number;
+  date: string;
+  timestamp: number;
+}
+
+interface CategoryDistribution {
+  category: string;
+  count: number;
+}
+
+interface Stats {
+  totalScans: number;
+  thisWeek: number;
+  mostCommon: string;
+  categoryDistribution: CategoryDistribution[];
+  recentClassifications: ClassificationEntry[];
+}
 
 export function DashboardContent() {
-  // Mock data - replace with actual data from backend
-  const stats = {
-    totalScans: 127,
-    thisWeek: 23,
-    mostCommon: "Plastic",
+  const [stats, setStats] = useState<Stats>({
+    totalScans: 0,
+    thisWeek: 0,
+    mostCommon: 'N/A',
+    categoryDistribution: [],
+    recentClassifications: [],
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchStats = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch('http://localhost:5000/stats');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch statistics');
+      }
+      
+      const data = await response.json();
+      setStats(data);
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+      setError('Failed to load statistics. Make sure the backend is running.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const recentClassifications = [
-    {
-      id: 1,
-      category: "Plastic",
-      confidence: 0.92,
-      date: "2024-01-15",
-      icon: "♻️",
-    },
-    {
-      id: 2,
-      category: "Organic",
-      confidence: 0.87,
-      date: "2024-01-15",
-      icon: "🌿",
-    },
-    {
-      id: 3,
-      category: "Paper",
-      confidence: 0.95,
-      date: "2024-01-14",
-      icon: "📄",
-    },
-    {
-      id: 4,
-      category: "Metal",
-      confidence: 0.78,
-      date: "2024-01-14",
-      icon: "🔩",
-    },
-    {
-      id: 5,
-      category: "Plastic",
-      confidence: 0.89,
-      date: "2024-01-13",
-      icon: "♻️",
-    },
-  ];
+  useEffect(() => {
+    fetchStats();
+    
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(fetchStats, 30000);
+    
+    return () => clearInterval(interval);
+  }, []);
 
-  const categoryDistribution = [
-    { category: "Plastic", count: 45, color: "bg-chart-1" },
-    { category: "Organic", count: 38, color: "bg-chart-2" },
-    { category: "Paper", count: 28, color: "bg-chart-3" },
-    { category: "Metal", count: 16, color: "bg-chart-4" },
-  ];
+  const getCategoryIcon = (category: string) => {
+    const icons: Record<string, string> = {
+      plastic: "♻️",
+      organic: "🌿",
+      paper: "📄",
+      metal: "🔩",
+      glass: "🥃",
+      cardboard: "📦",
+      battery: "🔋",
+    };
+    return icons[category.toLowerCase()] || "🗑️";
+  };
+
+  const getCategoryColor = (category: string, index: number) => {
+    const colors: Record<string, string> = {
+      plastic: "bg-chart-1",
+      metal: "bg-chart-2",
+      paper: "bg-chart-3",
+      glass: "bg-chart-4",
+      cardboard: "bg-chart-5",
+      organic: "bg-green-500",
+      battery: "bg-yellow-500",
+    };
+    return colors[category.toLowerCase()] || `bg-chart-${(index % 4) + 1}`;
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  if (loading && stats.totalScans === 0) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <RefreshCw className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading statistics...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Track your waste classification history and environmental impact
-        </p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
+          <p className="text-muted-foreground">
+            Track your waste classification history and environmental impact
+          </p>
+        </div>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={fetchStats}
+          disabled={loading}
+        >
+          <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
       </div>
+
+      {error && (
+        <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+          <p className="text-destructive text-sm">{error}</p>
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="grid md:grid-cols-3 gap-6 mb-8">
@@ -109,53 +184,71 @@ export function DashboardContent() {
         {/* Category Distribution */}
         <Card className="p-6">
           <h2 className="text-xl font-semibold mb-6">Category Distribution</h2>
-          <div className="space-y-4">
-            {categoryDistribution.map((item) => (
-              <div key={item.category}>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium">{item.category}</span>
-                  <span className="text-sm text-muted-foreground">
-                    {item.count} items
-                  </span>
+          {stats.categoryDistribution.length > 0 ? (
+            <div className="space-y-4">
+              {stats.categoryDistribution.map((item, index) => (
+                <div key={item.category}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">{getCategoryIcon(item.category)}</span>
+                      <span className="font-medium">{item.category}</span>
+                    </div>
+                    <span className="text-sm text-muted-foreground">
+                      {item.count} items
+                    </span>
+                  </div>
+                  <div className="h-3 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className={`h-full ${getCategoryColor(item.category, index)}`}
+                      style={{
+                        width: `${(item.count / stats.totalScans) * 100}%`,
+                      }}
+                    />
+                  </div>
                 </div>
-                <div className="h-3 bg-muted rounded-full overflow-hidden">
-                  <div
-                    className={`h-full ${item.color}`}
-                    style={{
-                      width: `${(item.count / stats.totalScans) * 100}%`,
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <p>No classifications yet.</p>
+              <p className="text-sm">Start scanning waste to see statistics!</p>
+            </div>
+          )}
         </Card>
 
         {/* Recent Classifications */}
         <Card className="p-6">
           <h2 className="text-xl font-semibold mb-6">Recent Classifications</h2>
-          <div className="space-y-3">
-            {recentClassifications.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{item.icon}</span>
-                  <div>
-                    <p className="font-medium">{item.category}</p>
-                    <p className="text-sm text-muted-foreground">{item.date}</p>
+          {stats.recentClassifications.length > 0 ? (
+            <>
+              <div className="space-y-3">
+                {stats.recentClassifications.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{getCategoryIcon(item.category)}</span>
+                      <div>
+                        <p className="font-medium">{item.category}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {formatDate(item.date)}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-sm font-medium">
+                      {(item.confidence * 100).toFixed(0)}%
+                    </span>
                   </div>
-                </div>
-                <span className="text-sm font-medium">
-                  {(item.confidence * 100).toFixed(0)}%
-                </span>
+                ))}
               </div>
-            ))}
-          </div>
-          <Button variant="outline" className="w-full mt-4 bg-transparent">
-            View All History
-          </Button>
+            </>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <p>No recent classifications.</p>
+              <p className="text-sm">Your classification history will appear here.</p>
+            </div>
+          )}
         </Card>
       </div>
 
@@ -170,19 +263,27 @@ export function DashboardContent() {
         </p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-primary-foreground/10 rounded-lg p-4 text-center">
-            <p className="text-2xl font-bold">89%</p>
+            <p className="text-2xl font-bold">
+              {stats.totalScans > 0 ? '89%' : '0%'}
+            </p>
             <p className="text-sm text-primary-foreground/80">Accuracy Rate</p>
           </div>
           <div className="bg-primary-foreground/10 rounded-lg p-4 text-center">
-            <p className="text-2xl font-bold">12kg</p>
+            <p className="text-2xl font-bold">
+              {(stats.totalScans * 0.095).toFixed(1)}kg
+            </p>
             <p className="text-sm text-primary-foreground/80">CO₂ Saved</p>
           </div>
           <div className="bg-primary-foreground/10 rounded-lg p-4 text-center">
-            <p className="text-2xl font-bold">45</p>
+            <p className="text-2xl font-bold">
+              {Math.floor(stats.totalScans * 0.35)}
+            </p>
             <p className="text-sm text-primary-foreground/80">Trees Equiv.</p>
           </div>
           <div className="bg-primary-foreground/10 rounded-lg p-4 text-center">
-            <p className="text-2xl font-bold">23L</p>
+            <p className="text-2xl font-bold">
+              {Math.floor(stats.totalScans * 0.18)}L
+            </p>
             <p className="text-sm text-primary-foreground/80">Water Saved</p>
           </div>
         </div>

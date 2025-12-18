@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Recycle, Camera, BarChart3, Leaf } from "lucide-react";
+import { Recycle, Camera, BarChart3, Leaf, Video } from "lucide-react";
 import Link from "next/link";
 
 export default function HomePage() {
@@ -27,6 +27,12 @@ export default function HomePage() {
               className="text-sm font-medium hover:text-primary transition-colors"
             >
               Classify
+            </Link>
+            <Link
+              href="/live-tracking"
+              className="text-sm font-medium hover:text-primary transition-colors"
+            >
+              Live Tracking
             </Link>
             <Link
               href="/dashboard"
@@ -102,6 +108,17 @@ export default function HomePage() {
                   </p>
                 </Card>
                 <Card className="p-6 text-center">
+                  <div className="w-12 h-12 bg-red-500/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <Video className="w-6 h-6 text-red-500" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">
+                    Live Tracking
+                  </h3>
+                  <p className="text-muted-foreground">
+                    Real-time AI detection using your webcam with bounding boxes
+                  </p>
+                </Card>
+                <Card className="p-6 text-center">
                   <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                     <Recycle className="w-6 h-6 text-accent" />
                   </div>
@@ -109,9 +126,11 @@ export default function HomePage() {
                     AI Classification
                   </h3>
                   <p className="text-muted-foreground">
-                    Our YOLO model analyzes and classifies your waste instantly
+                    YOLO model analyzes and classifies waste types instantly
                   </p>
                 </Card>
+              </div>
+              <div className="grid md:grid-cols-2 gap-8 mt-8 max-w-3xl mx-auto">
                 <Card className="p-6 text-center">
                   <div className="w-12 h-12 bg-chart-2/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                     <BarChart3 className="w-6 h-6 text-chart-2" />
@@ -119,6 +138,15 @@ export default function HomePage() {
                   <h3 className="text-xl font-semibold mb-2">Track History</h3>
                   <p className="text-muted-foreground">
                     View your classification history and environmental impact
+                  </p>
+                </Card>
+                <Card className="p-6 text-center">
+                  <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <Leaf className="w-6 h-6 text-green-500" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">Make Impact</h3>
+                  <p className="text-muted-foreground">
+                    See your CO₂ savings and contribution to the environment
                   </p>
                 </Card>
               </div>

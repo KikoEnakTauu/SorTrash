@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "category": "paper",
+    "confidence": 0.39,
+    "date": "2025-12-18T12:17:07.646524",
+    "timestamp": 1766035027.646524
+  },
+  {
+    "id": 2,
+    "category": "paper",
+    "confidence": 0.79,
+    "date": "2025-12-18T12:20:38.072453",
+    "timestamp": 1766035238.072453
+  },
+  {
+    "id": 3,
+    "category": "paper",
+    "confidence": 0.94,
+    "date": "2025-12-18T12:20:38.072453",
+    "timestamp": 1766035238.072453
+  }
+]

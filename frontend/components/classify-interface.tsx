@@ -33,23 +33,34 @@ export function ClassifyInterface() {
     if (!isCameraActive && videoRef.current) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
+          video: { width: 1280, height: 720 },
         });
         videoRef.current.srcObject = stream;
+        videoRef.current.play();
         setIsCameraActive(true);
       } catch (err) {
         console.error("Error accessing camera:", err);
+        alert("Could not access camera. Please check permissions.");
       }
     } else if (videoRef.current && isCameraActive) {
       const canvas = document.createElement("canvas");
       canvas.width = videoRef.current.videoWidth;
       canvas.height = videoRef.current.videoHeight;
-      canvas.getContext("2d")?.drawImage(videoRef.current, 0, 0);
-      setSelectedImage(canvas.toDataURL());
+      const ctx = canvas.getContext("2d");
+      ctx?.drawImage(videoRef.current, 0, 0);
+      
+      const imageDataUrl = canvas.toDataURL("image/jpeg");
+      setSelectedImage(imageDataUrl);
+      
       const stream = videoRef.current.srcObject as MediaStream;
       stream?.getTracks().forEach((track) => track.stop());
       setIsCameraActive(false);
       setResult(null);
+      
+      // Automatically classify the captured image
+      setTimeout(() => {
+        handleClassify();
+      }, 100);
     }
   };
 
@@ -65,32 +76,51 @@ export function ClassifyInterface() {
 
       // Create FormData
       const formData = new FormData();
-      formData.append('file', blob, 'image.jpg');
+      formData.append("file", blob, "image.jpg");
 
       // Send to Flask backend
-      const apiResponse = await fetch('http://localhost:5000/classify', {
-        method: 'POST',
+      const apiResponse = await fetch("http://localhost:5000/classify", {
+        method: "POST",
         body: formData,
       });
 
       if (!apiResponse.ok) {
-        throw new Error('Failed to classify image');
+        throw new Error("Failed to classify image");
       }
 
       const data = await apiResponse.json();
 
-      // Process detections - assuming the model is trained for waste categories
-      // For now, map to mock categories or use the detected classes
-      const wasteCategories = ['plastic', 'organic', 'paper', 'metal', 'glass', 'cardboard'];
-      const results = data.detections.map((det: any) => ({
-        category: det.class,
-        confidence: det.confidence,
-        color: `text-chart-${Math.floor(Math.random() * 4) + 1}`, // Random color for now
-      }));
+      // Check if detections were found
+      if (!data.detections || data.detections.length === 0) {
+        alert("No waste detected in the image. Please try another image.");
+        setIsLoading(false);
+        return;
+      }
+
+      // Assign colors to categories consistently
+      const categoryColors: Record<string, string> = {
+        plastic: "text-chart-1",
+        metal: "text-chart-2",
+        paper: "text-chart-3",
+        glass: "text-chart-4",
+        cardboard: "text-chart-5",
+        organic: "text-green-500",
+        battery: "text-yellow-500",
+      };
+
+      // Process detections from Flask backend
+      const results = data.detections.map((det: any) => {
+        const categoryLower = det.class.toLowerCase();
+        return {
+          category: det.class,
+          confidence: det.confidence,
+          color: categoryColors[categoryLower] || "text-chart-1",
+        };
+      });
 
       // Find primary category (highest confidence)
-      const primary = results.reduce((prev: any, current: any) => 
-        (prev.confidence > current.confidence) ? prev : current
+      const primary = results.reduce((prev: any, current: any) =>
+        prev.confidence > current.confidence ? prev : current
       );
 
       setResult({
@@ -100,34 +130,31 @@ export function ClassifyInterface() {
         disposalTip: getDisposalTip(primary.category),
       });
     } catch (error) {
-      console.error('Error classifying image:', error);
-      // Fallback to mock data
-      const mockResults = [
-        { category: "Plastic", confidence: 0.92, color: "text-chart-1" },
-        { category: "Organic", confidence: 0.87, color: "text-chart-2" },
-      ];
-      setResult({
-        primaryCategory: mockResults[0].category,
-        confidence: mockResults[0].confidence,
-        allResults: mockResults,
-        disposalTip: getDisposalTip(mockResults[0].category),
-      });
+      console.error("Error classifying image:", error);
+      alert("Failed to classify image. Please make sure the Flask backend is running on http://localhost:5000");
     } finally {
       setIsLoading(false);
     }
   };
 
   const getDisposalTip = (category: string) => {
+    const categoryLower = category.toLowerCase();
     const tips: Record<string, string> = {
-      Plastic:
+      plastic:
         "Rinse the plastic container before recycling to avoid contamination.",
-      Organic:
+      organic:
         "Compost this organic waste to create nutrient-rich soil for plants.",
-      Paper: "Keep paper dry and clean for better recycling quality.",
-      Metal: "Remove any non-metal parts before recycling metal items.",
+      paper: "Keep paper dry and clean for better recycling quality.",
+      metal: "Remove any non-metal parts before recycling metal items.",
+      glass:
+        "Rinse glass containers and remove lids before placing in recycling.",
+      cardboard:
+        "Flatten cardboard boxes to save space and keep them dry for recycling.",
+      battery:
+        "Take batteries to designated collection points. Never throw in regular trash.",
     };
     return (
-      tips[category] ||
+      tips[categoryLower] ||
       "Dispose according to local waste management guidelines."
     );
   };
@@ -172,18 +199,23 @@ export function ClassifyInterface() {
           </div>
         ) : isCameraActive ? (
           <div className="space-y-4">
-            <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
+            <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
               <video
                 ref={videoRef}
                 autoPlay
                 playsInline
                 className="w-full h-full object-cover"
               />
+              {/* Live indicator */}
+              <div className="absolute top-4 left-4 flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded-full shadow-lg">
+                <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                <span className="text-sm font-medium">LIVE</span>
+              </div>
             </div>
             <div className="flex gap-3 justify-center">
-              <Button onClick={handleCapture}>
+              <Button onClick={handleCapture} size="lg">
                 <Camera className="w-4 h-4 mr-2" />
-                Capture Photo
+                Capture & Classify
               </Button>
               <Button
                 variant="outline"
@@ -196,6 +228,9 @@ export function ClassifyInterface() {
                 Cancel
               </Button>
             </div>
+            <p className="text-sm text-muted-foreground text-center">
+              Position the waste item in frame and click capture to take photo and classify
+            </p>
           </div>
         ) : (
           <div className="space-y-4">

@@ -5,6 +5,7 @@ This is the Flask backend for the waste classification app using YOLO.
 ## Setup
 
 1. Install Python dependencies:
+
    ```
    pip install -r requirements.txt
    ```
