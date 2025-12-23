@@ -77,7 +77,8 @@ export function ClassifyInterface() {
       formData.append("file", blob, "image.jpg");
 
       // Send to Flask backend
-      const apiResponse = await fetch("http://localhost:5000/classify", {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      const apiResponse = await fetch(`${API_URL}/classify`, {
         method: "POST",
         body: formData,
       });
@@ -130,7 +131,7 @@ export function ClassifyInterface() {
     } catch (error) {
       console.error("Error classifying image:", error);
       alert(
-        "Failed to classify image. Please make sure the Flask backend is running on http://localhost:5000"
+        "Failed to classify image. Please make sure the backend is running and NEXT_PUBLIC_API_URL is set."
       );
     } finally {
       setIsLoading(false);
