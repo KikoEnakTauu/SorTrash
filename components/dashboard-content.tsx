@@ -30,7 +30,7 @@ export function DashboardContent() {
   const [stats, setStats] = useState<Stats>({
     totalScans: 0,
     thisWeek: 0,
-    mostCommon: 'N/A',
+    mostCommon: "N/A",
     categoryDistribution: [],
     recentClassifications: [],
   });
@@ -41,18 +41,19 @@ export function DashboardContent() {
     try {
       setLoading(true);
       setError(null);
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const API_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
       const response = await fetch(`${API_URL}/stats`);
-      
+
       if (!response.ok) {
-        throw new Error('Failed to fetch statistics');
+        throw new Error("Failed to fetch statistics");
       }
-      
+
       const data = await response.json();
       setStats(data);
     } catch (err) {
-      console.error('Error fetching stats:', err);
-      setError('Failed to load statistics. Make sure the backend is running.');
+      console.error("Error fetching stats:", err);
+      setError("Failed to load statistics. Make sure the backend is running.");
     } finally {
       setLoading(false);
     }
@@ -60,10 +61,10 @@ export function DashboardContent() {
 
   useEffect(() => {
     fetchStats();
-    
+
     // Auto-refresh every 30 seconds
     const interval = setInterval(fetchStats, 30000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -95,11 +96,11 @@ export function DashboardContent() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -125,13 +126,15 @@ export function DashboardContent() {
             Track your waste classification history and environmental impact
           </p>
         </div>
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <Button
+          variant="outline"
+          size="sm"
           onClick={fetchStats}
           disabled={loading}
         >
-          <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw
+            className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`}
+          />
           Refresh
         </Button>
       </div>
@@ -191,7 +194,9 @@ export function DashboardContent() {
                 <div key={item.category}>
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-xl">{getCategoryIcon(item.category)}</span>
+                      <span className="text-xl">
+                        {getCategoryIcon(item.category)}
+                      </span>
                       <span className="font-medium">{item.category}</span>
                     </div>
                     <span className="text-sm text-muted-foreground">
@@ -200,7 +205,10 @@ export function DashboardContent() {
                   </div>
                   <div className="h-3 bg-muted rounded-full overflow-hidden">
                     <div
-                      className={`h-full ${getCategoryColor(item.category, index)}`}
+                      className={`h-full ${getCategoryColor(
+                        item.category,
+                        index
+                      )}`}
                       style={{
                         width: `${(item.count / stats.totalScans) * 100}%`,
                       }}
@@ -229,7 +237,9 @@ export function DashboardContent() {
                     className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg"
                   >
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl">{getCategoryIcon(item.category)}</span>
+                      <span className="text-2xl">
+                        {getCategoryIcon(item.category)}
+                      </span>
                       <div>
                         <p className="font-medium">{item.category}</p>
                         <p className="text-sm text-muted-foreground">
@@ -247,7 +257,9 @@ export function DashboardContent() {
           ) : (
             <div className="text-center py-8 text-muted-foreground">
               <p>No recent classifications.</p>
-              <p className="text-sm">Your classification history will appear here.</p>
+              <p className="text-sm">
+                Your classification history will appear here.
+              </p>
             </div>
           )}
         </Card>
@@ -265,7 +277,7 @@ export function DashboardContent() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-primary-foreground/10 rounded-lg p-4 text-center">
             <p className="text-2xl font-bold">
-              {stats.totalScans > 0 ? '89%' : '0%'}
+              {stats.totalScans > 0 ? "89%" : "0%"}
             </p>
             <p className="text-sm text-primary-foreground/80">Accuracy Rate</p>
           </div>
