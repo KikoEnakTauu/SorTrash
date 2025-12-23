@@ -16,8 +16,7 @@ export function AuthForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement authentication logic
-    console.log("[v0] Auth submit:", { email, isLogin });
+    console.log("Auth submit:", { email, isLogin });
   };
 
   return (

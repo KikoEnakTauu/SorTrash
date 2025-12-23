@@ -14,8 +14,6 @@ export function ClassifyInterface() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isCameraActive, setIsCameraActive] = useState(false);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -29,40 +27,40 @@ export function ClassifyInterface() {
     }
   };
 
-  const handleCapture = async () => {
-    if (!isCameraActive && videoRef.current) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: 1280, height: 720 },
-        });
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-        setIsCameraActive(true);
-      } catch (err) {
-        console.error("Error accessing camera:", err);
-        alert("Could not access camera. Please check permissions.");
-      }
-    } else if (videoRef.current && isCameraActive) {
-      const canvas = document.createElement("canvas");
-      canvas.width = videoRef.current.videoWidth;
-      canvas.height = videoRef.current.videoHeight;
-      const ctx = canvas.getContext("2d");
-      ctx?.drawImage(videoRef.current, 0, 0);
+  // const handleCapture = async () => {
+  //   if (!isCameraActive && videoRef.current) {
+  //     try {
+  //       const stream = await navigator.mediaDevices.getUserMedia({
+  //         video: { width: 1280, height: 720 },
+  //       });
+  //       videoRef.current.srcObject = stream;
+  //       videoRef.current.play();
+  //       setIsCameraActive(true);
+  //     } catch (err) {
+  //       console.error("Error accessing camera:", err);
+  //       alert("Could not access camera. Please check permissions.");
+  //     }
+  //   } else if (videoRef.current && isCameraActive) {
+  //     const canvas = document.createElement("canvas");
+  //     canvas.width = videoRef.current.videoWidth;
+  //     canvas.height = videoRef.current.videoHeight;
+  //     const ctx = canvas.getContext("2d");
+  //     ctx?.drawImage(videoRef.current, 0, 0);
 
-      const imageDataUrl = canvas.toDataURL("image/jpeg");
-      setSelectedImage(imageDataUrl);
+  //     const imageDataUrl = canvas.toDataURL("image/jpeg");
+  //     setSelectedImage(imageDataUrl);
 
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream?.getTracks().forEach((track) => track.stop());
-      setIsCameraActive(false);
-      setResult(null);
+  //     const stream = videoRef.current.srcObject as MediaStream;
+  //     stream?.getTracks().forEach((track) => track.stop());
+  //     setIsCameraActive(false);
+  //     setResult(null);
 
-      // Automatically classify the captured image
-      setTimeout(() => {
-        handleClassify();
-      }, 100);
-    }
-  };
+  //     // Automatically classify the captured image
+  //     setTimeout(() => {
+  //       handleClassify();
+  //     }, 100);
+  //   }
+  // };
 
   const handleClassify = async () => {
     if (!selectedImage) return;
@@ -173,13 +171,11 @@ export function ClassifyInterface() {
   return (
     <div className="space-y-6">
       <Card className="p-8">
-        {!selectedImage && !isCameraActive ? (
+        {!selectedImage ? (
           <div className="space-y-6">
             <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed border-border rounded-lg">
               <Upload className="w-12 h-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground mb-4">
-                Upload an image or use your camera
-              </p>
+              <p className="text-muted-foreground mb-4">Upload an image</p>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -192,50 +188,51 @@ export function ClassifyInterface() {
                   <Upload className="w-4 h-4 mr-2" />
                   Choose File
                 </Button>
-                <Button variant="outline" onClick={handleCapture}>
+                {/* <Button variant="outline" onClick={handleCapture}>
                   <Camera className="w-4 h-4 mr-2" />
                   Use Camera
-                </Button>
+                </Button> */}
               </div>
             </div>
-          </div>
-        ) : isCameraActive ? (
-          <div className="space-y-4">
-            <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                className="w-full h-full object-cover"
-              />
-              {/* Live indicator */}
-              <div className="absolute top-4 left-4 flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded-full shadow-lg">
-                <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                <span className="text-sm font-medium">LIVE</span>
-              </div>
-            </div>
-            <div className="flex gap-3 justify-center">
-              <Button onClick={handleCapture} size="lg">
-                <Camera className="w-4 h-4 mr-2" />
-                Capture & Classify
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  const stream = videoRef.current?.srcObject as MediaStream;
-                  stream?.getTracks().forEach((track) => track.stop());
-                  setIsCameraActive(false);
-                }}
-              >
-                Cancel
-              </Button>
-            </div>
-            <p className="text-sm text-muted-foreground text-center">
-              Position the waste item in frame and click capture to take photo
-              and classify
-            </p>
           </div>
         ) : (
+          // : isCameraActive ? (
+          //   <div className="space-y-4">
+          //     <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
+          //       <video
+          //         ref={videoRef}
+          //         autoPlay
+          //         playsInline
+          //         className="w-full h-full object-cover"
+          //       />
+          //       {/* Live indicator */}
+          //       <div className="absolute top-4 left-4 flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded-full shadow-lg">
+          //         <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+          //         <span className="text-sm font-medium">LIVE</span>
+          //       </div>
+          //     </div>
+          //     <div className="flex gap-3 justify-center">
+          //       {/* <Button onClick={handleCapture} size="lg">
+          //         <Camera className="w-4 h-4 mr-2" />
+          //         Capture & Classify
+          //       </Button> */}
+          //       <Button
+          //         variant="outline"
+          //         onClick={() => {
+          //           const stream = videoRef.current?.srcObject as MediaStream;
+          //           stream?.getTracks().forEach((track) => track.stop());
+          //           setIsCameraActive(false);
+          //         }}
+          //       >
+          //         Cancel
+          //       </Button>
+          //     </div>
+          //     <p className="text-sm text-muted-foreground text-center">
+          //       Position the waste item in frame and click capture to take photo
+          //       and classify
+          //     </p>
+          //   </div>
+          // )
           <div className="space-y-4">
             <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
               <Image

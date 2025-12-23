@@ -1,56 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Recycle, Camera, BarChart3, Leaf, Video } from "lucide-react";
+import { Recycle, Camera, BarChart3, Leaf } from "lucide-react";
 import Link from "next/link";
+import { Navbar } from "@/components/navbar";
 
 export default function HomePage() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Recycle className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold">SorTrash</span>
-          </div>
-          <nav className="hidden md:flex items-center gap-6">
-            <Link
-              href="/"
-              className="text-sm font-medium hover:text-primary transition-colors"
-            >
-              Home
-            </Link>
-            <Link
-              href="/classify"
-              className="text-sm font-medium hover:text-primary transition-colors"
-            >
-              Classify
-            </Link>
-            <Link
-              href="/live-tracking"
-              className="text-sm font-medium hover:text-primary transition-colors"
-            >
-              Live Tracking
-            </Link>
-            <Link
-              href="/dashboard"
-              className="text-sm font-medium hover:text-primary transition-colors"
-            >
-              Dashboard
-            </Link>
-          </nav>
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/auth">Sign in</Link>
-            </Button>
-            <Button size="sm" asChild>
-              <Link href="/classify">Get Started</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Hero Section */}
       <main className="flex-1">
@@ -104,16 +62,7 @@ export default function HomePage() {
                   </div>
                   <h3 className="text-xl font-semibold mb-2">Upload Image</h3>
                   <p className="text-muted-foreground">
-                    Take a photo or upload an image of your waste item
-                  </p>
-                </Card>
-                <Card className="p-6 text-center">
-                  <div className="w-12 h-12 bg-red-500/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <Video className="w-6 h-6 text-red-500" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">Live Tracking</h3>
-                  <p className="text-muted-foreground">
-                    Real-time AI detection using your webcam with bounding boxes
+                    Upload an image of your waste item
                   </p>
                 </Card>
                 <Card className="p-6 text-center">
@@ -124,11 +73,9 @@ export default function HomePage() {
                     AI Classification
                   </h3>
                   <p className="text-muted-foreground">
-                    YOLO model analyzes and classifies waste types instantly
+                    Our YOLO model analyzes and classifies your waste instantly
                   </p>
                 </Card>
-              </div>
-              <div className="grid md:grid-cols-2 gap-8 mt-8 max-w-3xl mx-auto">
                 <Card className="p-6 text-center">
                   <div className="w-12 h-12 bg-chart-2/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                     <BarChart3 className="w-6 h-6 text-chart-2" />
@@ -136,15 +83,6 @@ export default function HomePage() {
                   <h3 className="text-xl font-semibold mb-2">Track History</h3>
                   <p className="text-muted-foreground">
                     View your classification history and environmental impact
-                  </p>
-                </Card>
-                <Card className="p-6 text-center">
-                  <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <Leaf className="w-6 h-6 text-green-500" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">Make Impact</h3>
-                  <p className="text-muted-foreground">
-                    See your CO₂ savings and contribution to the environment
                   </p>
                 </Card>
               </div>

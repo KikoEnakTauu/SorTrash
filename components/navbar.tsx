@@ -11,6 +11,7 @@ export function Navbar() {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/classify", label: "Classify" },
+    { href: "/live-tracking", label: "Live Tracking" },
     { href: "/dashboard", label: "Dashboard" },
   ];
 
@@ -48,12 +49,6 @@ export function Navbar() {
           <div className="hidden sm:flex items-center gap-3">
             <Button variant="ghost" size="sm" asChild>
               <Link href="/auth">Sign in</Link>
-            </Button>
-            <Button size="sm" asChild className="shadow-sm">
-              <Link href="/classify">
-                <Camera className="w-4 h-4 mr-2" />
-                Scan Now
-              </Link>
             </Button>
           </div>
         </div>
